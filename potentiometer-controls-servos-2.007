@@ -1,0 +1,74 @@
+#include <Servo.h>
+Servo myservo; // create servo object to control a servo
+Servo myservo2; 
+
+// These constants won't change. They're used to give names to the pins used:
+const int analogInPin = A4; // Analog input pin that the potentiometer is attached to
+const int analogOutPin = 9; // Analog output pin that the LED is attached to
+int sensorValue = 0; // value read from the pot
+int outputValue = 0; // value output to the PWM (analog out)
+void setup() {
+// initialize serial communications at 9600 bps:
+Serial.begin(9600);
+pinMode(LED_BUILTIN, OUTPUT);
+
+myservo.attach(5); // attaches the servo on pin 9 to the servo object
+myservo2.attach(3); // attaches the servo on pin 9 to the servo object
+
+}
+void loop() {
+// read the analog in value:
+sensorValue = analogRead(analogInPin);
+// map it to the range of the analog out:
+if (sensorValue > 1000) // this number should be adjusted for your environment!!
+{
+digitalWrite(LED_BUILTIN, HIGH);
+
+
+// Activate servos and have them move: 
+
+myservo.write(0);
+// send it full speed 
+// send btwn 0 (fast) and 90 (stop) 
+// 180 is opposite direction. 
+
+//0 is counterclockwise, 175 is other direction 
+// sets the servo position as in degree 0~175. If you use fixed angle servo, 0 makes it rotate
+//CCW (counter clockwise), 90 makes it stop, 175 make it rotate CW (clockwise). BTW, with direct control from the RC
+//transmitter, you can only get 0~60 range.
+delay(1000); // waits for the servo to get there
+myservo.write(90); // Stop the motor. If the motor drift, adjust the value or pot of servomotor
+//90 means stop 
+delay(1000);
+
+myservo2.write(0);
+// sets the servo position as in degree 0~175. If you use fixed angle servo, 0 makes it rotate
+//CCW, 90 makes it stop, 175 make it rotate CW. BTW, with direct control from the RC
+//transmitter, you can only get 0~60 range.
+delay(1000); // waits for the servo to get there
+myservo2.write(90); // Stop the motor. If the motor drift, adjust the value or pot of servomotor
+delay(1000);
+
+
+
+
+}
+else
+{
+digitalWrite(LED_BUILTIN, LOW);
+}
+outputValue = map(sensorValue, 700, 1023, 0, 179); // Input range is 0~1023 for analog sensor. Current setup only produce the range of
+//700(darkest)~1023 (brightest)
+
+// change the analog out value:
+analogWrite(analogOutPin, outputValue);
+// print the results to the Serial Monitor:
+Serial.print("sensor = ");
+Serial.print(sensorValue);
+Serial.print("\t output = ");
+Serial.println(outputValue);
+// wait 2 milliseconds before the next loop for the analog-to-digital
+// converter to settle after the last reading:
+delay(100); //typical delay is much shorter to make the update frequency high. In this case, we use a longer delay to filter the photoresist value
+//fluctua
+}
