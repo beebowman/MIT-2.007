@@ -1,0 +1,78 @@
+//Bo Bowman Code
+
+#include <Servo.h>
+Servo myservoL; // create servo object to control a servo (left wheel of robot) 
+Servo myservoR; // create servo object to control a servo (right wheel of robot) 
+Servo myservoB; // create servo object to control a servo (block dropper servo) 
+
+// These constants won't change. They're used to give names to the pins used:
+const int analogInPin = A4; // Analog input pin that the potentiometer is attached to
+const int analogOutPin = 9; // Analog output pin that the LED is attached to
+int sensorValue = 0; // value read from the pot
+int outputValue = 0; // value output to the PWM (analog out)
+void setup() {
+// initialize serial communications at 9600 bps:
+Serial.begin(9600);
+pinMode(LED_BUILTIN, OUTPUT);
+
+myservoB.attach(6); // attaches the servo on pin D6I to the servo object (block dropper servo) 
+myservoL.attach(3); // attaches the servo on pin D5I to the servo object (left wheel) 
+myservoR.attach(2); // attaches the servo on pin D2I to the servo object (right wheel) 
+
+// servo_speed = 180; // it is wise to set servo speed at the beginning here. In this case, this is a dummy variable; in reality I would set variables at the top here that I would want. 
+
+}
+void loop() {
+// read the analog in value:
+sensorValue = analogRead(analogInPin);
+// map it to the range of the analog out:
+if (sensorValue > 1000) // this number should be adjusted for your environment!!
+{
+digitalWrite(LED_BUILTIN, HIGH);
+
+
+// Activate servos and have them move: 
+// send it full speed 
+// send btwn 0 (fast) and 90 (stop) 
+// 180 is opposite direction. 
+//0 is counterclockwise, 175 is other direction 
+// sets the servo position as in degree 0~175. If you use fixed angle servo, 0 makes it rotate
+//CCW (counter clockwise), 90 makes it stop, 175 make it rotate CW (clockwise). BTW, with direct control from the RC
+//transmitter, you can only get 0~60 range.
+
+// Move robot forward 
+myservoB.write(110); // left wheel rotates to move robot forward (180) is the fastest speed, where a delay of 250 is good) 
+delay(400);
+
+stoprobot();
+
+}
+else
+{
+digitalWrite(LED_BUILTIN, LOW);
+}
+outputValue = map(sensorValue, 700, 1023, 0, 179); // Input range is 0~1023 for analog sensor. Current setup only produce the range of
+//700(darkest)~1023 (brightest)
+
+// change the analog out value:
+analogWrite(analogOutPin, outputValue);
+// print the results to the Serial Monitor:
+Serial.print("sensor = ");
+Serial.print(sensorValue);
+Serial.print("\t output = ");
+Serial.println(outputValue);
+// wait 2 milliseconds before the next loop for the analog-to-digital
+// converter to settle after the last reading:
+delay(100); //typical delay is much shorter to make the update frequency high. In this case, we use a longer delay to filter the photoresist value
+//fluctua
+}
+
+
+
+void stoprobot() {
+
+//myservoL.write(90); // Stop the motor. If the motor drift, adjust the value or pot of servomotor
+//myservoR.write(90); // Stop the motor. If the motor drift, adjust the value or pot of servomotor
+myservoB.write(90); // stopthe motor 
+
+}
