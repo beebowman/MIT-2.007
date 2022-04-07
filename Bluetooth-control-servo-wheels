@@ -1,0 +1,219 @@
+//Notes by Bo Bowman: 
+//Download LearnThruTech iPhone app to use this, and connect to it via bluetooth on the app. 
+//Pull out the bluetooth module while you're uploading b/c b/c they both use the same port 
+//Connet left wheel to D20
+//Connect right wheel to D30 
+//run the automatic code and then run this bluetooth code after. 
+
+//      Servo_Test_2007:
+//      ----------------
+//          - reads data from Bluetooth Module (HC-05) connected to serial port
+//          - expects to receive characters: (BT RC Car app)
+//                                             "F" = Forward
+//                                             "B" = Backward
+//                                             "R" = Right Turn
+//                                             "L" = Left Turn
+//                                             "S" = Stop
+//
+//
+//
+//          - modified for compatability with HM-10 and  LearnThruTech RC Car app
+//
+// Bluetooth Module HC-05:  Standard Bluetooth - SPP (Serial Port) Protocol
+//                          (requires "Pairing" with Host Device (PIN = 1234)
+//                          can connect to Windows PC - Bluetooth RC Car.exe (VB application)
+//                          can connect to Android phone - Car Bluetooth RC or Bluetooth RC Controller apps
+//
+// Bluetooth Module HM-10:  Bluetooth 4.0 Low Energy Module (BTLE)
+//                          No "Pairing" required - selected through each application
+//                          can connect to Android or iPhone
+//                          uses LearnThruTech RC Car Controller application
+//                          (available in App Store or via Goggle Play)
+//
+
+//**********************************************************************************************
+//                                             LIBRARIES
+//**********************************************************************************************
+#include <Servo.h>
+
+//**********************************************************************************************
+//                                        CONSTANTS AND VARIABLES
+//**********************************************************************************************
+#define SERVO1 2        //define a pin for servo1
+#define SERVO2 3        //define a pin for servo2
+
+const int neutral = 1500; //stop 
+const int forward = 2000; 
+const int backward = 1000;
+const int forwardslower = 1750; 
+const int backwardslower = 1250; 
+
+int Servo_Value1 = 0;
+int Servo_Value2 = 0;
+
+char t;
+char old_t;
+
+int NumButtonsPressed = 0;
+
+///**********************************************************************************************
+//                                              OBJECTS
+//**********************************************************************************************
+Servo DriveServo1;        // initialize  servo
+Servo DriveServo2;        // initialize  servo
+
+//**********************************************************************************************
+//                                         Function: setup()
+//**********************************************************************************************
+void setup()
+{ 
+  Serial.begin(9600);
+
+  pinMode (SERVO1, OUTPUT); // want servo pin to be an output
+  DriveServo1.attach(SERVO1); // attach pin to the servo 
+  DriveServo1.writeMicroseconds(neutral);  // set servo to mid-point
+
+  pinMode (SERVO2, OUTPUT); // want servo pin to be an output
+  DriveServo2.attach(SERVO2); // attach pin to the servo 
+  DriveServo2.writeMicroseconds(neutral);  // set servo to mid-point
+}
+ 
+
+//**********************************************************************************************
+//                                         Function: loop()
+//**********************************************************************************************
+void loop()
+{
+    Check_Bluetooth();  
+}
+
+//**********************************************************************************************
+//                                    Function: Check_Bluetooth()
+//**********************************************************************************************
+void Check_Bluetooth()
+{
+  if (Serial.available())
+  {
+    t = Serial.read();
+    Serial.println(t);
+  }
+  else                                        // for BTLE app
+  {                                           // for BTLE app
+    t = 'N';                                  // for BTLE app
+    if (old_t != 'N') Serial.println(t);      // for BTLE app
+  }                                           // for BTLE app
+ 
+  if (t == 'F')
+  {            //move forward(all motors rotate in forward direction)
+    if (old_t != t) 
+    {
+      MoveForward();
+      NumButtonsPressed = NumButtonsPressed + 1;
+    }
+    old_t = t;
+  }
+ 
+else if(t == 'B')
+  {      //move reverse (all motors rotate in reverse direction)
+    if (old_t != t)
+    {
+      MoveBackward();
+      NumButtonsPressed = NumButtonsPressed + 1;
+    }
+    old_t = t;
+  }
+ 
+else if(t == 'L')
+  {      //turn right (left side motors rotate in forward direction, right side motors doesn't rotate)
+    if (old_t != t)
+    {
+      LeftTurn();
+      NumButtonsPressed = NumButtonsPressed + 1;
+    }
+    old_t = t;
+  }
+ 
+else if(t == 'R')
+  {      //turn left (right side motors rotate in forward direction, left side motors doesn't rotate)
+    if (old_t != t) 
+    {
+      RightTurn();
+      NumButtonsPressed = NumButtonsPressed + 1;
+    }
+    old_t = t;
+  }
+ 
+else if(t == 'S')
+  {      //STOP (all motors stop)
+    NumButtonsPressed = NumButtonsPressed - 1;              // for BTLE app
+    if (NumButtonsPressed < 0) NumButtonsPressed = 0;       // for BTLE app
+    if (NumButtonsPressed == 0)                             // for BTLE app
+    {
+      StopMoving();      
+      old_t = t;                        
+    }
+  }  
+
+else if(t == 'N')                         // for BTLE app
+  {                                       // for BTLE app
+    // nothing received
+  }                                       // for BTLE app
+  
+delay(10);
+}
+
+//**********************************************************************************************
+//                                      Function: StopMoving()
+//**********************************************************************************************
+void StopMoving()
+{
+  //put code to stop motors here
+  Serial.println("Stop");
+  DriveServo1.writeMicroseconds(neutral);          // set servo to position
+  DriveServo2.writeMicroseconds(neutral);          // set servo to position
+}
+
+//**********************************************************************************************
+//                                      Function: RightTurn()
+//**********************************************************************************************
+void RightTurn()
+{
+  //put code to turn Right here
+  Serial.println("Right");
+  DriveServo1.writeMicroseconds(backwardslower);          // set servo to position
+  DriveServo2.writeMicroseconds(backwardslower);          // set servo to position
+  // to turn slower, change backward to backward/2 
+}
+
+//**********************************************************************************************
+//                                      Function: LeftTurn()
+//**********************************************************************************************
+void LeftTurn()
+{
+  //put code to turn Left here 
+  Serial.println("Left");
+  DriveServo1.writeMicroseconds(forwardslower);          // set servo to position
+  DriveServo2.writeMicroseconds(forwardslower);          // set servo to position
+}
+
+//**********************************************************************************************
+//                                      Function: MoveForward()
+//**********************************************************************************************
+void MoveForward()
+{
+  //put code to move forward here
+  Serial.println("Forward");
+  DriveServo1.writeMicroseconds(backward);          // set servo to position
+  DriveServo2.writeMicroseconds(forward);          // set servo to position
+}
+
+//**********************************************************************************************
+//                                      Function: MoveBackward()
+//**********************************************************************************************
+void MoveBackward()
+{
+  //put code to move Backward here
+  Serial.println("Backward");
+  DriveServo1.writeMicroseconds(forward);          // set servo to position
+  DriveServo2.writeMicroseconds(backward);          // set servo to position
+}
