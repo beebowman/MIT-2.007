@@ -1,0 +1,152 @@
+//Bo Bowman Code
+//1) Turn off robot & turn on again, and it should set servo back to original out position! Then load the block 
+//at end of code, it sets servo to the position that the controller is in, so set that to the dot on the controller for the turny thingy. 
+
+//Put your servos connected to the Output channels! (for autonomous mode) 
+//Make sure to turn on the robot (BATTERY ON) not just laptop power 
+//plug B (block dropper) into 6 
+
+#include <Servo.h>
+Servo myservoL; // create servo object to control a servo (left wheel of robot) 
+Servo myservoR; // create servo object to control a servo (right wheel of robot) 
+Servo myservoB; // create servo object to control a servo (block dropper servo) 
+
+// These constants won't change. They're used to give names to the pins used:
+const int analogInPin = A4; // Analog input pin that the potentiometer is attached to
+const int analogOutPin = 9; // Analog output pin that the LED is attached to
+int sensorValue = 0; // value read from the pot
+int outputValue = 0; // value output to the PWM (analog out)
+void setup() {
+// initialize serial communications at 9600 bps:
+Serial.begin(9600);
+pinMode(LED_BUILTIN, OUTPUT);
+
+myservoB.attach(6); // attaches the servo on pin D6I to the servo object (block dropper servo) 
+myservoL.attach(3); // attaches the servo on pin D5I to the servo object (left wheel) 
+myservoR.attach(2); // attaches the servo on pin D2I to the servo object (right wheel) 
+
+//pinMode(3, INPUT);
+//pinMode(2, INPUT);
+//pinMode(6, INPUT);
+//delay(500);
+
+//place the pin forward to position 90 
+myservoB.write(90); //put pin forward
+delay(500);
+
+// servo_speed = 180; // it is wise to set servo speed at the beginning here. In this case, this is a dummy variable; in reality I would set variables at the top here that I would want. 
+
+}
+
+void loop() {
+// read the analog in value:
+sensorValue = analogRead(analogInPin);
+Serial.println(sensorValue);
+// map it to the range of the analog out:
+
+if (sensorValue > 1000) // this number should be adjusted for your environment!!
+{
+digitalWrite(LED_BUILTIN, HIGH);
+
+// Activate servos and have them move: 
+// send it full speed 
+// send btwn 0 (fast) and 90 (stop) 
+// 180 is opposite direction. 
+//0 is counterclockwise, 175 is other direction 
+// sets the servo position as in degree 0~175. If you use fixed angle servo, 0 makes it rotate
+//CCW (counter clockwise), 90 makes it stop, 175 make it rotate CW (clockwise). BTW, with direct control from the RC
+//transmitter, you can only get 0~60 range.
+
+//pinMode(3, OUTPUT);
+//pinMode(2, OUTPUT);
+//pinMode(6, OUTPUT);
+
+// Move robot backwards (towards the block dropper) 
+myservoL.write(175); // left wheel rotates to move robot forward 
+myservoR.write(0); // left wheel rotates to move robot forward 
+delay(780); //move distance towards the hole 
+
+stoprobot();
+delay(300);
+
+//pull the pin back 
+myservoB.write(110); //pull the pin back 
+delay(1000);
+
+//put the pin in forward position
+myservoB.write(90); //put pin forward 
+delay(1000);
+
+// release the block 
+//myservoB.write(110); 
+//delay(800); //pause for a second (will go back to original position after
+
+//myservoB.write(90); // block dropper at position with pin retracted  
+
+//For autonomous,
+//For manual, pinmodeinput() 
+pinMode(3, INPUT);
+pinMode(2, INPUT);
+pinMode(6, INPUT);
+
+//do a 30sec forced timeout! (wait until sensor OR 
+
+// start driving forward
+//myservoL.write(175); // left wheel rotates to move robot forward 
+//myservoR.write(0); // left wheel rotates to move robot forward 
+//long start_time = millis();
+//while (analogRead(A2) > 128 && millis() - start_time < 5000) {}
+
+//start_time = millis() 
+//if (millis() - start_time < 5000) //know the timeout has been hit {
+// do auto
+//}
+
+//else {
+//manual mode 
+//}
+
+
+}
+else
+{
+digitalWrite(LED_BUILTIN, LOW);
+}
+outputValue = map(sensorValue, 700, 1023, 0, 179); // Input range is 0~1023 for analog sensor. Current setup only produce the range of
+//700(darkest)~1023 (brightest)
+
+// change the analog out value:
+analogWrite(analogOutPin, outputValue);
+// print the results to the Serial Monitor:
+Serial.print("sensor = ");
+Serial.print(sensorValue);
+Serial.print("\t output = ");
+Serial.println(outputValue);
+// wait 2 milliseconds before the next loop for the analog-to-digital
+// converter to settle after the last reading:
+delay(100); //typical delay is much shorter to make the update frequency high. In this case, we use a longer delay to filter the photoresist value
+//fluctua
+}
+
+
+void stoprobot() {
+
+myservoL.write(90); // Stop the motor. If the motor drifts, adjust the value or pot of servomotor
+myservoR.write(90); // Stop the motor. If the motor drifts, adjust the value or pot of servomotor
+
+}
+
+void stopblockdropper() {
+
+myservoB.write(90); // stop the motor 
+
+}
+
+void movefoward() {
+  
+// Move robot forward (towards the ball collector) 
+myservoL.write(0); // left wheel rotates to move robot forward 
+myservoR.write(180); // left wheel rotates to move robot forward 
+delay(500);
+
+}
