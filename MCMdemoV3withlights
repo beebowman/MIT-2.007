@@ -1,0 +1,354 @@
+//Bo Bowman Code
+//0) Before the competition, check that the dial is turned properly on the controller (test the robot in manual, then set a given position and mark it on the controller and leave it like that on the controller 
+//1) Turn off robot & turn on again, and it should set servo back to original out position! 
+//2) Then load the block 
+//3) After you activate with a flashlight, it will then go into manual mode 
+//   in manual mode, it sets the servo to the position that the controller is in, 
+//   so set that to the dot on the controller for the turny thingy. 
+//4) If the light didn't activate the robot, then within 30 seconds of turning it on, it will go to manual mode. 
+//BEWARE: if I turn on the robot, automatically in 30sec it goes to manual mode, so if competition wait time is >30sec, get rid of that part of my code** 
+//BEWARE: if I disassemble my setup in any way (e.g. move the delrin block on the rod, or unscrew the horn and put it back on)
+//        Then I will need to retest my robot and ensure that I've adjusted the values for //pull the pin back, and //put the pin in forward position 
+
+//Put your servos connected to the Output channels! (for autonomous mode) 
+//Make sure to turn on the robot (BATTERY ON) not just laptop power 
+//plug B (block dropper) into 6 
+
+//Define global variables used for timer 
+unsigned long startMillis;  //some global variables available anywhere in the program
+unsigned long currentMillis;
+
+#include <Servo.h>
+Servo myservoL; // create servo object to control a servo (left wheel of robot) 
+Servo myservoR; // create servo object to control a servo (right wheel of robot) 
+Servo myservoB; // create servo object to control a servo (block dropper servo) 
+
+// These constants won't change. They're used to give names to the pins used:
+const int analogInPin = A4; // Analog input pin that the potentiometer is attached to
+const int analogOutPin = 9; // Analog output pin that the LED is attached to
+int sensorValue = 0; // value read from the pot
+int outputValue = 0; // value output to the PWM (analog out)
+
+
+
+
+//NEOPIXEL CODE 
+// NEOPIXEL BEST PRACTICES for most reliable operation:
+// - Add 1000 uF CAPACITOR between NeoPixel strip's + and - connections.
+// - MINIMIZE WIRING LENGTH between microcontroller board and first pixel.
+// - NeoPixel strip's DATA-IN should pass through a 300-500 OHM RESISTOR.
+// - AVOID connecting NeoPixels on a LIVE CIRCUIT. If you must, ALWAYS
+//   connect GROUND (-) first, then +, then data.
+// - When using a 3.3V microcontroller with a 5V-powered NeoPixel strip,
+//   a LOGIC-LEVEL CONVERTER on the data line is STRONGLY RECOMMENDED.
+// (Skipping these may work OK on your workbench but can fail in the field)
+
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+ #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
+#endif
+
+// Which pin on the Arduino is connected to the NeoPixels?
+// On a Trinket or Gemma we suggest changing this to 1:
+#define LED_PIN    6 
+// *Connect your Arduino Uno or Arduino Nano (or other board) to digital pin D6 
+
+// How many NeoPixels are attached to the Arduino?
+#define LED_COUNT 16
+
+// Declare our NeoPixel strip object:
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+// Argument 1 = Number of pixels in NeoPixel strip
+// Argument 2 = Arduino pin number (most are valid)
+// Argument 3 = Pixel type flags, add together as needed:
+//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
+//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
+//   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
+
+
+
+
+
+void setup() {
+
+  
+// initialize serial communications at 9600 bps:
+Serial.begin(9600);
+pinMode(LED_BUILTIN, OUTPUT);
+
+myservoB.attach(6); // attaches the servo on pin D6I to the servo object (block dropper servo) 
+myservoL.attach(3); // attaches the servo on pin D5I to the servo object (left wheel) 
+myservoR.attach(2); // attaches the servo on pin D2I to the servo object (right wheel) 
+
+//place the pin forward to position 90 
+myservoB.write(90); //put pin forward
+delay(500);
+
+// servo_speed = 180; // it is wise to set servo speed at the beginning here. In this case, this is a dummy variable; in reality I would set variables at the top here that I would want. 
+
+//record the time 
+startMillis = millis(); 
+Serial.print("record the time");
+
+
+  // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
+  // Any other board, you can remove this part (but no harm leaving it):
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+  clock_prescale_set(clock_div_1);
+#endif
+  // END of Trinket-specific code.
+
+  strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  strip.show();            // Turn OFF all pixels ASAP
+  strip.setBrightness(10); // Set BRIGHTNESS to about 1/5 (max = 255)
+
+}
+
+
+void loop() {
+// read the analog in value:
+sensorValue = analogRead(analogInPin);
+Serial.println(sensorValue);
+// map it to the range of the analog out:
+  
+
+if (sensorValue > 1000) // this number should be adjusted for your environment!!
+
+{
+digitalWrite(LED_BUILTIN, HIGH);
+
+// Activate servos and have them move: 
+// send it full speed 
+// send btwn 0 (fast) and 90 (stop) 
+// 180 is opposite direction. 
+//0 is counterclockwise, 175 is other direction 
+// sets the servo position as in degree 0~175. If you use fixed angle servo, 0 makes it rotate
+//CCW (counter clockwise), 90 makes it stop, 175 make it rotate CW (clockwise). BTW, with direct control from the RC
+//transmitter, you can only get 0~60 range.
+
+//pinMode(3, OUTPUT);
+//pinMode(2, OUTPUT);
+//pinMode(6, OUTPUT);
+
+// Move robot backwards (towards the block dropper) 
+myservoL.write(175); // left wheel rotates to move robot forward 
+myservoR.write(0); // left wheel rotates to move robot forward 
+delay(780); //move distance towards the hole 
+
+stoprobot();
+delay(300);
+
+//pull the pin back 
+myservoB.write(115); //pull the pin back 
+delay(2000);
+
+//put the pin in forward position
+myservoB.write(90); //put pin forward 
+delay(1000);
+
+// release the block 
+//myservoB.write(110); 
+//delay(800); //pause for a second (will go back to original position after
+
+//myservoB.write(90); // block dropper at position with pin retracted  
+
+//For autonomous,
+//For manual, use pinmode INPUT as shown below. 
+
+//play some celebration lights 
+theaterChase(strip.Color(  0,   0, 127), 400); // Blue, half brightness
+colorWipe(strip.Color(  0,   0, 255), 400); // change to blue color 
+delay(100); 
+
+//Switch to Manual mode. 
+pinMode(3, INPUT);
+pinMode(2, INPUT);
+pinMode(6, INPUT);
+
+//do a 30sec forced timeout! (wait until sensor OR 
+
+// start driving forward
+//myservoL.write(175); // left wheel rotates to move robot forward 
+//myservoR.write(0); // left wheel rotates to move robot forward 
+//long start_time = millis();
+//while (analogRead(A2) > 128 && millis() - start_time < 5000) {}
+
+//If lots of time has passed and we still haven't switched the light trigger, switch to manual mode 
+//if (millis() - startMillis < 30000) //know the timeout has been hit {
+// do auto (manual mode) 
+//pinMode(3, INPUT);
+//pinMode(2, INPUT);
+//pinMode(6, INPUT);
+
+
+//start_time = millis() 
+//if (millis() - start_time < 5000) //know the timeout has been hit {
+// do auto (manual mode) 
+//}
+
+//else {
+//manual mode 
+//}
+
+
+}
+
+
+
+else
+{
+digitalWrite(LED_BUILTIN, LOW);
+
+}
+
+
+outputValue = map(sensorValue, 700, 1023, 0, 179); // Input range is 0~1023 for analog sensor. Current setup only produce the range of
+//700(darkest)~1023 (brightest)
+
+// change the analog out value:
+analogWrite(analogOutPin, outputValue);
+// print the results to the Serial Monitor:
+Serial.print("sensor = ");
+Serial.print(sensorValue);
+Serial.print("\t output = ");
+Serial.println(outputValue);
+// wait 2 milliseconds before the next loop for the analog-to-digital
+// converter to settle after the last reading:
+delay(100); //typical delay is much shorter to make the update frequency high. In this case, we use a longer delay to filter the photoresist value
+//fluctuation 
+
+
+//** (code below for timer and setting it automatically to manual mode within 30sec of turning on the robot! 
+currentMillis = millis(); 
+if (millis() - startMillis > 30000) //know the timeout has been hit {
+// do manual mode 
+{
+
+//change to green color 
+colorWipe(strip.Color(  0, 255,   0), 30); // Green 
+
+Serial.print("manual mode");
+pinMode(3, INPUT);
+pinMode(2, INPUT);
+pinMode(6, INPUT);
+delay(2000);
+
+}
+
+
+
+}
+
+
+
+void stoprobot() {
+
+myservoL.write(90); // Stop the motor. If the motor drifts, adjust the value or pot of servomotor
+myservoR.write(90); // Stop the motor. If the motor drifts, adjust the value or pot of servomotor
+
+}
+
+void stopblockdropper() {
+
+myservoB.write(90); // stop the motor 
+
+}
+
+void movefoward() {
+  
+// Move robot forward (towards the ball collector) 
+myservoL.write(0); // left wheel rotates to move robot forward 
+myservoR.write(180); // left wheel rotates to move robot forward 
+delay(500);
+
+}
+
+void colorWipe(uint32_t color, int wait) {
+  for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
+    strip.show();                          //  Update strip to match
+    delay(wait);                           //  Pause for a moment
+  }
+}
+
+// Theater-marquee-style chasing lights. Pass in a color (32-bit value,
+// a la strip.Color(r,g,b) as mentioned above), and a delay time (in ms)
+// between frames.
+void theaterChase(uint32_t color, int wait) {
+  for(int a=0; a<10; a++) {  // Repeat 10 times...
+    for(int b=0; b<3; b++) { //  'b' counts from 0 to 2...
+      strip.clear();         //   Set all pixels in RAM to 0 (off)
+      // 'c' counts up from 'b' to end of strip in steps of 3...
+      for(int c=b; c<strip.numPixels(); c += 3) {
+        strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
+      }
+      strip.show(); // Update strip with new contents
+      delay(wait);  // Pause for a moment
+    }
+  }
+}
+
+// Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
+void rainbow(int wait) {
+  // Hue of first pixel runs 5 complete loops through the color wheel.
+  // Color wheel has a range of 65536 but it's OK if we roll over, so
+  // just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
+  // means we'll make 5*65536/256 = 1280 passes through this outer loop:
+  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {
+    for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+      // Offset pixel hue by an amount to make one full revolution of the
+      // color wheel (range of 65536) along the length of the strip
+      // (strip.numPixels() steps):
+      int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
+      // strip.ColorHSV() can take 1 or 3 arguments: a hue (0 to 65535) or
+      // optionally add saturation and value (brightness) (each 0 to 255).
+      // Here we're using just the single-argument hue variant. The result
+      // is passed through strip.gamma32() to provide 'truer' colors
+      // before assigning to each pixel:
+      strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
+    }
+    strip.show(); // Update strip with new contents
+    delay(wait);  // Pause for a moment
+  }
+}
+
+// Rainbow-enhanced theater marquee. Pass delay time (in ms) between frames.
+void theaterChaseRainbow(int wait) {
+  int firstPixelHue = 0;     // First pixel starts at red (hue 0)
+  for(int a=0; a<30; a++) {  // Repeat 30 times...
+    for(int b=0; b<3; b++) { //  'b' counts from 0 to 2...
+      strip.clear();         //   Set all pixels in RAM to 0 (off)
+      // 'c' counts up from 'b' to end of strip in increments of 3...
+      for(int c=b; c<strip.numPixels(); c += 3) {
+        // hue of pixel 'c' is offset by an amount to make one full
+        // revolution of the color wheel (range 65536) along the length
+        // of the strip (strip.numPixels() steps):
+        int      hue   = firstPixelHue + c * 65536L / strip.numPixels();
+        uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
+        strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
+      }
+      strip.show();                // Update strip with new contents
+      delay(wait);                 // Pause for a moment
+      firstPixelHue += 65536 / 90; // One cycle of color wheel over 90 frames
+    }
+  }
+}
+
+
+//Original Neopixel loop code: 
+//void loop() {   //*This is the loop within which you call different visual Neopixel effects. 
+//  // Fill along the length of the strip in various colors... (*loading) 
+//  colorWipe(strip.Color(255,   0,   0), 50); // Red 
+//  colorWipe(strip.Color(  0, 255,   0), 50); // Green
+//  colorWipe(strip.Color(  0,   0, 255), 50); // Blue
+//
+//  // Do a theater marquee effect in various colors... (*flashing) 
+//  theaterChase(strip.Color(127, 127, 127), 50); // White, half brightness
+//  theaterChase(strip.Color(127,   0,   0), 50); // Red, half brightness
+//  theaterChase(strip.Color(  0,   0, 127), 50); // Blue, half brightness
+//
+// // rainbow(10);             // Flowing rainbow cycle along the whole strip (*rainbow flashing) 
+//  theaterChaseRainbow(50); // Rainbow-enhanced theaterChase variant
+//}
