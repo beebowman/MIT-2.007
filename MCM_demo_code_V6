@@ -108,7 +108,7 @@ digitalWrite(LED_BUILTIN, HIGH);
 //myservoR.write(0); // left wheel rotates to move robot forward 
 
 // Move (drive) robot backwards (towards the block dropper) 
-drive(0.9,0.9);
+drive(0.7,0.7);
 
 //TEST FOR DISTANCE: 200 milliseconds = 2.65" travel distance, 
 //so speed = 2.65"/200milliseconds = 0.01325"/millisecond 
@@ -121,14 +121,15 @@ drive(0.9,0.9);
 
 //so, 10.435" * (1 millisecond / 0.01325") = 787.5 milliseconds. 
 
-delay(787); //move distance towards the hole //ORIGINAL was 780 seconds. 
+//787 was original delay. 
+delay(797); //move distance towards the hole //ORIGINAL was 780 seconds. 
 
 stoprobot();
 delay(300);
 
 //pull the pin back 
 myservoB.write(115); //pull the pin back 
-delay(2000);
+delay(1800);
 
 //put the pin in forward position
 //myservoB.write(90); //put pin forward 
