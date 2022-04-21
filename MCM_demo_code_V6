@@ -108,7 +108,7 @@ digitalWrite(LED_BUILTIN, HIGH);
 //myservoR.write(0); // left wheel rotates to move robot forward 
 
 // Move (drive) robot backwards (towards the block dropper) 
-drive(0.9,0.9) 
+drive(0.9,0.9);
 
 //TEST FOR DISTANCE: 200 milliseconds = 2.65" travel distance, 
 //so speed = 2.65"/200milliseconds = 0.01325"/millisecond 
