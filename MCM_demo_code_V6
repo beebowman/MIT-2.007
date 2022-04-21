@@ -228,6 +228,6 @@ delay(500);
 }
 
 void drive(float left_power, float right_power) {
-  myservoL.write(map(left_power, -1, 1, 180, 0);
-  myservoR.write(map(right_power, -1, 1, 0, 180); 
+  myservoL.write(map(left_power, -1, 1, 180, 0));
+  myservoR.write(map(right_power, -1, 1, 0, 180)); 
 }
