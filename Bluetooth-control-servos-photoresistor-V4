@@ -76,11 +76,15 @@ Servo DriveServo4;        // initialize  servo that pushes the RAM pusher forwar
 //                                              Potentiometer  
 //**********************************************************************************************
 // These constants won't change. They're used to give names to the pins used:
-const int analogInPin = A4; // Analog input pin that the potentiometer is attached to
+const int analogInPin = A7; // Analog input pin that the potentiometer is attached to
 const int analogOutPin = 9; // Analog output pin that the LED is attached to
 int sensorValue = 0; // value read from the pot
 int outputValue = 0; // value output to the PWM (analog out)
 
+//Connect photoresistor to GND, and the other side of the photoresistor is split/connected (from the middle) to both to pin A7 and also to a 200 ohm resistor. The 200 ohm resistor is attached to P.5V of the board. 
+// A photoresistor needs to go both to GND and to the pin and to 5V, with a resistor between the photoresistor and the 5V. When light shines, this decreases the resistance
+//of the resistor to 0 Ohms, and when there's darkness, the resistor goes to some other high value. Play around and use a resistor that's about the same value (with multimeter measurement)
+//as the photoresistor when the photoresistor has light shined on it. 
 
 //**********************************************************************************************
 //                                         Function: setup()
@@ -121,7 +125,7 @@ void loop()
     sensorValue = analogRead(analogInPin);
     Serial.println(sensorValue);
 
-    if (sensorValue > 451) // this number should be adjusted for your environment!!
+    if (sensorValue < 400) // this number should be adjusted for your environment!! 
    {
     MoveForward();
     delay(400); 
